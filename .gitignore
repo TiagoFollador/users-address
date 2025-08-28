@@ -1,0 +1,62 @@
+# user-address frontend
+/user-address/.DS_Store
+/user-address/node_modules/
+/user-address/.react-router/
+/user-address/build/
+
+# user-address-api storage logs
+/user-address-api/storage/logs/*
+!/user-address-api/storage/logs/.gitignore
+
+# user-address-api storage framework views
+/user-address-api/storage/framework/views/*
+!/user-address-api/storage/framework/views/.gitignore
+
+# user-address-api storage framework testing
+/user-address-api/storage/framework/testing/*
+!/user-address-api/storage/framework/testing/.gitignore
+
+# user-address-api storage framework sessions
+/user-address-api/storage/framework/sessions/*
+!/user-address-api/storage/framework/sessions/.gitignore
+
+# user-address-api storage framework cache data
+/user-address-api/storage/framework/cache/data/*
+!/user-address-api/storage/framework/cache/data/.gitignore
+
+# user-address-api storage framework cache
+/user-address-api/storage/framework/cache/*
+!/user-address-api/storage/framework/cache/data/
+!/user-address-api/storage/framework/cache/.gitignore
+
+# user-address-api storage framework
+/user-address-api/storage/framework/compiled.php
+/user-address-api/storage/framework/config.php
+/user-address-api/storage/framework/down
+/user-address-api/storage/framework/events.scanned.php
+/user-address-api/storage/framework/maintenance.php
+/user-address-api/storage/framework/routes.php
+/user-address-api/storage/framework/routes.scanned.php
+/user-address-api/storage/framework/schedule-*
+/user-address-api/storage/framework/services.json
+
+# user-address-api storage app public
+/user-address-api/storage/app/public/*
+!/user-address-api/storage/app/public/.gitignore
+
+# user-address-api storage app private
+/user-address-api/storage/app/private/*
+!/user-address-api/storage/app/private/.gitignore
+
+# user-address-api storage app
+/user-address-api/storage/app/*
+!/user-address-api/storage/app/private/
+!/user-address-api/storage/app/public/
+!/user-address-api/storage/app/.gitignore
+
+# user-address-api database
+/user-address-api/database/*.sqlite*
+
+# user-address-api bootstrap cache
+/user-address-api/bootstrap/cache/*
+!/user-address-api/bootstrap/cache/.gitignore
