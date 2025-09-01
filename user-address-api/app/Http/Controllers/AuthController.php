@@ -4,14 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Services\AuthService;
+use App\Services\PasswordResetService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AuthController extends ApiController
 {
     public function __construct(
-        private AuthService $authService
+        private AuthService $authService,
+        private PasswordResetService $passwordResetService
     ) {}
 
     /**
@@ -192,5 +196,98 @@ class AuthController extends ApiController
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/forgot-password",
+     *     tags={"Authentication"},
+     *     summary="Solicitar recuperação de senha",
+     *     description="Enviar email com link para recuperação de senha",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", format="email", example="joao@example.com")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Email enviado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Email de recuperação enviado com sucesso")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Erro de validação"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        $result = $this->passwordResetService->sendResetEmail($request->email);
+
+        if ($result['success']) {
+            return $this->successResponse(null, $result['message']);
+        }
+
+        return $this->errorResponse($result['message']);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/reset-password",
+     *     tags={"Authentication"},
+     *     summary="Redefinir senha",
+     *     description="Redefinir senha usando token recebido por email",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"token","email","password","password_confirmation"},
+     *             @OA\Property(property="token", type="string", example="abc123def456..."),
+     *             @OA\Property(property="email", type="string", format="email", example="joao@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="novaSenha123"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="novaSenha123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Senha alterada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Senha alterada com sucesso")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erro de validação ou token inválido",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Token inválido"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        $result = $this->passwordResetService->resetPassword(
+            $request->email,
+            $request->token,
+            $request->password
+        );
+
+        if ($result['success']) {
+            return $this->successResponse(null, $result['message']);
+        }
+
+        return $this->errorResponse($result['message']);
     }
 }

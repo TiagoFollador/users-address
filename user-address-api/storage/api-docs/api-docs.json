@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "http://my-default-host.com",
+            "url": "http://localhost:8000",
             "description": "User Address API Server"
         }
     ],
@@ -346,14 +346,256 @@
                 ]
             }
         },
+        "/api/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Solicitar recuperação de senha",
+                "description": "Enviar email com link para recuperação de senha",
+                "operationId": "7af8817e88ba5874543ff38f188248f1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "joao@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email enviado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email de recuperação enviado com sucesso"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Erro de validação"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reset-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Redefinir senha",
+                "description": "Redefinir senha usando token recebido por email",
+                "operationId": "00c0aad74830221c6da409a1355ec736",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "token",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "token": {
+                                        "type": "string",
+                                        "example": "abc123def456..."
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "joao@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "novaSenha123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "novaSenha123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Senha alterada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Senha alterada com sucesso"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação ou token inválido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token inválido"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/contacts": {
             "get": {
                 "tags": [
                     "Contacts"
                 ],
                 "summary": "Listar contatos do usuário",
-                "description": "Retorna todos os contatos do usuário autenticado",
+                "description": "Retorna todos os contatos do usuário autenticado com filtros opcionais",
                 "operationId": "0f9efb5609dbb039b35ecafb28e492a2",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Buscar por nome, email, telefone, CPF ou endereço",
+                        "schema": {
+                            "type": "string",
+                            "example": "João"
+                        }
+                    },
+                    {
+                        "name": "city",
+                        "in": "query",
+                        "description": "Filtrar por cidade",
+                        "schema": {
+                            "type": "string",
+                            "example": "São Paulo"
+                        }
+                    },
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "description": "Filtrar por estado",
+                        "schema": {
+                            "type": "string",
+                            "example": "SP"
+                        }
+                    },
+                    {
+                        "name": "order_by",
+                        "in": "query",
+                        "description": "Campo para ordenação",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "name",
+                                "email",
+                                "city",
+                                "created_at"
+                            ],
+                            "example": "name"
+                        }
+                    },
+                    {
+                        "name": "order_direction",
+                        "in": "query",
+                        "description": "Direção da ordenação",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ],
+                            "example": "asc"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Número da página",
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Itens por página (máximo 100)",
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Lista de contatos retornada com sucesso",
@@ -366,10 +608,39 @@
                                             "example": true
                                         },
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Contact"
-                                            }
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/Contact"
+                                                    }
+                                                },
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 68
+                                                },
+                                                "from": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -416,11 +687,10 @@
                                     "name",
                                     "email",
                                     "phone",
-                                    "address",
-                                    "neighborhood",
-                                    "city",
-                                    "state",
-                                    "zip_code"
+                                    "cpf",
+                                    "cep",
+                                    "street",
+                                    "number"
                                 ],
                                 "properties": {
                                     "name": {
@@ -436,25 +706,25 @@
                                         "type": "string",
                                         "example": "11999999999"
                                     },
-                                    "address": {
+                                    "cpf": {
                                         "type": "string",
-                                        "example": "Rua das Flores, 123"
+                                        "example": "123.456.789-00"
                                     },
-                                    "neighborhood": {
-                                        "type": "string",
-                                        "example": "Centro"
-                                    },
-                                    "city": {
-                                        "type": "string",
-                                        "example": "São Paulo"
-                                    },
-                                    "state": {
-                                        "type": "string",
-                                        "example": "SP"
-                                    },
-                                    "zip_code": {
+                                    "cep": {
                                         "type": "string",
                                         "example": "01234-567"
+                                    },
+                                    "street": {
+                                        "type": "string",
+                                        "example": "Rua das Flores"
+                                    },
+                                    "number": {
+                                        "type": "string",
+                                        "example": "123"
+                                    },
+                                    "complement": {
+                                        "type": "string",
+                                        "example": "Apto 101"
                                     }
                                 },
                                 "type": "object"
@@ -654,25 +924,25 @@
                                         "type": "string",
                                         "example": "11999999999"
                                     },
-                                    "address": {
+                                    "cpf": {
                                         "type": "string",
-                                        "example": "Rua das Flores, 456"
+                                        "example": "123.456.789-00"
                                     },
-                                    "neighborhood": {
-                                        "type": "string",
-                                        "example": "Jardim"
-                                    },
-                                    "city": {
-                                        "type": "string",
-                                        "example": "São Paulo"
-                                    },
-                                    "state": {
-                                        "type": "string",
-                                        "example": "SP"
-                                    },
-                                    "zip_code": {
+                                    "cep": {
                                         "type": "string",
                                         "example": "01234-567"
+                                    },
+                                    "street": {
+                                        "type": "string",
+                                        "example": "Rua das Flores"
+                                    },
+                                    "number": {
+                                        "type": "string",
+                                        "example": "456"
+                                    },
+                                    "complement": {
+                                        "type": "string",
+                                        "example": "Sala 201"
                                     }
                                 },
                                 "type": "object"
@@ -1077,9 +1347,25 @@
                         "type": "string",
                         "example": "11999999999"
                     },
-                    "address": {
+                    "cpf": {
                         "type": "string",
-                        "example": "Rua das Flores, 123"
+                        "example": "123.456.789-00"
+                    },
+                    "cep": {
+                        "type": "string",
+                        "example": "01234-567"
+                    },
+                    "street": {
+                        "type": "string",
+                        "example": "Rua das Flores"
+                    },
+                    "number": {
+                        "type": "string",
+                        "example": "123"
+                    },
+                    "complement": {
+                        "type": "string",
+                        "example": "Apto 101"
                     },
                     "neighborhood": {
                         "type": "string",
@@ -1093,9 +1379,15 @@
                         "type": "string",
                         "example": "SP"
                     },
-                    "zip_code": {
-                        "type": "string",
-                        "example": "01234-567"
+                    "latitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": -23.5505
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": -46.6333
                     },
                     "created_at": {
                         "type": "string",

@@ -5,15 +5,51 @@ namespace App\Repositories;
 use App\Models\Contact;
 use App\Models\User;
 use App\Repositories\ContactRepositoryInterface;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ContactRepository implements ContactRepositoryInterface
 {
-    public function getUserContacts(User $user): Collection
+    public function getUserContacts(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        return $user->contacts()
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = $user->contacts();
+
+        // Apply filters
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('cpf', 'like', "%{$search}%")
+                  ->orWhere('street', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($filters['city'])) {
+            $query->where('city', 'like', "%{$filters['city']}%");
+        }
+
+        if (!empty($filters['state'])) {
+            $query->where('state', $filters['state']);
+        }
+
+        // Apply ordering
+        $orderBy = $filters['order_by'] ?? 'created_at';
+        $orderDirection = $filters['order_direction'] ?? 'desc';
+        
+        // Validate order_by field to prevent SQL injection
+        $allowedOrderFields = ['name', 'email', 'city', 'created_at', 'updated_at'];
+        if (!in_array($orderBy, $allowedOrderFields)) {
+            $orderBy = 'created_at';
+        }
+        
+        // Validate order direction
+        $orderDirection = in_array(strtolower($orderDirection), ['asc', 'desc']) ? $orderDirection : 'desc';
+        
+        $query->orderBy($orderBy, $orderDirection);
+
+        return $query->paginate($perPage);
     }
 
     public function create(User $user, array $data): Contact

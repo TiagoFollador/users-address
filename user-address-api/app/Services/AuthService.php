@@ -28,11 +28,12 @@ class AuthService
 
     public function login(array $credentials): array
     {
-        if (!Auth::attempt($credentials)) {
+    // Stateless login: find user by email and verify password without using session-based Auth::attempt
+        $user = $this->userRepository->findByEmail($credentials['email'] ?? null);
+        if (!$user || !\Illuminate\Support\Facades\Hash::check($credentials['password'] ?? '', $user->password)) {
             throw new \Exception('Credenciais inválidas', 401);
         }
 
-        $user = Auth::user();
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return [

@@ -22,14 +22,64 @@ class ContactController extends ApiController
      *     path="/api/contacts",
      *     tags={"Contacts"},
      *     summary="Listar contatos do usuário",
-     *     description="Retorna todos os contatos do usuário autenticado",
+     *     description="Retorna todos os contatos do usuário autenticado com filtros opcionais",
      *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Buscar por nome, email, telefone, CPF ou endereço",
+     *         @OA\Schema(type="string", example="João")
+     *     ),
+     *     @OA\Parameter(
+     *         name="city",
+     *         in="query",
+     *         description="Filtrar por cidade",
+     *         @OA\Schema(type="string", example="São Paulo")
+     *     ),
+     *     @OA\Parameter(
+     *         name="state",
+     *         in="query",
+     *         description="Filtrar por estado",
+     *         @OA\Schema(type="string", example="SP")
+     *     ),
+     *     @OA\Parameter(
+     *         name="order_by",
+     *         in="query",
+     *         description="Campo para ordenação",
+     *         @OA\Schema(type="string", enum={"name", "email", "city", "created_at"}, example="name")
+     *     ),
+     *     @OA\Parameter(
+     *         name="order_direction",
+     *         in="query",
+     *         description="Direção da ordenação",
+     *         @OA\Schema(type="string", enum={"asc", "desc"}, example="asc")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Número da página",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         description="Itens por página (máximo 100)",
+     *         @OA\Schema(type="integer", example=15)
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Lista de contatos retornada com sucesso",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Contact"))
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Contact")),
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="last_page", type="integer", example=5),
+     *                 @OA\Property(property="per_page", type="integer", example=15),
+     *                 @OA\Property(property="total", type="integer", example=68),
+     *                 @OA\Property(property="from", type="integer", example=1),
+     *                 @OA\Property(property="to", type="integer", example=15)
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -44,7 +94,10 @@ class ContactController extends ApiController
     public function index(Request $request): JsonResponse
     {
         try {
-            $contacts = $this->contactService->getUserContacts($request->user());
+            $filters = $request->only(['search', 'city', 'state', 'order_by', 'order_direction']);
+            $perPage = min($request->get('per_page', 15), 100); // Max 100 items per page
+            
+            $contacts = $this->contactService->getUserContacts($request->user(), $filters, $perPage);
 
             return $this->successResponse($contacts);
         } catch (\Exception $e) {
@@ -62,15 +115,15 @@ class ContactController extends ApiController
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name","email","phone","address","neighborhood","city","state","zip_code"},
+     *             required={"name","email","phone","cpf","cep","street","number"},
      *             @OA\Property(property="name", type="string", example="Maria Silva"),
      *             @OA\Property(property="email", type="string", format="email", example="maria@example.com"),
      *             @OA\Property(property="phone", type="string", example="11999999999"),
-     *             @OA\Property(property="address", type="string", example="Rua das Flores, 123"),
-     *             @OA\Property(property="neighborhood", type="string", example="Centro"),
-     *             @OA\Property(property="city", type="string", example="São Paulo"),
-     *             @OA\Property(property="state", type="string", example="SP"),
-     *             @OA\Property(property="zip_code", type="string", example="01234-567")
+     *             @OA\Property(property="cpf", type="string", example="123.456.789-00"),
+     *             @OA\Property(property="cep", type="string", example="01234-567"),
+     *             @OA\Property(property="street", type="string", example="Rua das Flores"),
+     *             @OA\Property(property="number", type="string", example="123"),
+     *             @OA\Property(property="complement", type="string", example="Apto 101")
      *         )
      *     ),
      *     @OA\Response(
@@ -186,11 +239,11 @@ class ContactController extends ApiController
      *             @OA\Property(property="name", type="string", example="Maria Silva"),
      *             @OA\Property(property="email", type="string", format="email", example="maria@example.com"),
      *             @OA\Property(property="phone", type="string", example="11999999999"),
-     *             @OA\Property(property="address", type="string", example="Rua das Flores, 456"),
-     *             @OA\Property(property="neighborhood", type="string", example="Jardim"),
-     *             @OA\Property(property="city", type="string", example="São Paulo"),
-     *             @OA\Property(property="state", type="string", example="SP"),
-     *             @OA\Property(property="zip_code", type="string", example="01234-567")
+     *             @OA\Property(property="cpf", type="string", example="123.456.789-00"),
+     *             @OA\Property(property="cep", type="string", example="01234-567"),
+     *             @OA\Property(property="street", type="string", example="Rua das Flores"),
+     *             @OA\Property(property="number", type="string", example="456"),
+     *             @OA\Property(property="complement", type="string", example="Sala 201")
      *         )
      *     ),
      *     @OA\Response(

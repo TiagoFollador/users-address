@@ -20,6 +20,7 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (response) => {
+      // API may return a 200 with success=false; handle that explicitly so users see errors
       if (response.success && response.data) {
         setToken(response.data.token);
         toast({
@@ -28,7 +29,16 @@ export default function Login() {
         });
         // Redirecionar para o dashboard
         window.location.href = '/';
+        return;
       }
+
+      // If API returned success:false, show the server message or a generic error
+      console.error('Login failed (API):', response);
+      toast({
+        variant: 'destructive',
+        title: 'Erro no login',
+        description: response.message || 'Credenciais inválidas. Verifique e tente novamente.',
+      });
     },
     onError: (error: any) => {
       toast({
@@ -94,7 +104,12 @@ export default function Login() {
             </Button>
           </div>
 
-          <div className="text-center">
+          <div className="text-center space-y-2">
+            <p className="text-sm text-gray-600">
+              <a href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                Esqueci minha senha
+              </a>
+            </p>
             <p className="text-sm text-gray-600">
               Não tem uma conta?{' '}
               <a href="/register" className="font-medium text-blue-600 hover:text-blue-500">
