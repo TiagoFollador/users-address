@@ -78,6 +78,7 @@ export default function Register() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Digite seu nome completo"
+                maxLength={100}
               />
               {errors.name && (
                 <p className="mt-1 text-sm text-red-600">{errors.name[0]}</p>
@@ -95,6 +96,7 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Digite seu email"
+                maxLength={100}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email[0]}</p>
@@ -112,6 +114,7 @@ export default function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite sua senha"
+                maxLength={50}
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password[0]}</p>
@@ -129,6 +132,7 @@ export default function Register() {
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}
                 placeholder="Confirme sua senha"
+                maxLength={50}
               />
               {errors.password_confirmation && (
                 <p className="mt-1 text-sm text-red-600">{errors.password_confirmation[0]}</p>

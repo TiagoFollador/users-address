@@ -76,6 +76,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Digite seu email"
+                maxLength={100}
               />
             </div>
             <div>
@@ -90,6 +91,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite sua senha"
+                maxLength={50}
               />
             </div>
           </div>
