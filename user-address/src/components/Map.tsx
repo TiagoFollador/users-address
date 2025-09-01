@@ -1,10 +1,11 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+// src/components/Map.tsx
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Contact } from '../lib/types';
-import { useEffect } from 'react';
 import L from 'leaflet';
+import { useEffect } from 'react';
 
-// Corrige o problema do ícone padrão do Leaflet no React
+// Corrige o ícone padrão do Leaflet que pode quebrar no React
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
@@ -12,33 +13,23 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
-interface Props {
-  contact: Contact | null;
+// Hook customizado para centralizar o mapa quando o contato selecionado muda
+function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  return null;
 }
 
-export function Map({ contact }: Props) {
-  const position: [number, number] = contact
-    ? [contact.latitude, contact.longitude]
-    : [-14.235, -51.9253]; // Posição padrão (centro do Brasil)
-
+export function Map({ contact }: { contact: Contact | null }) {
+  const position: [number, number] = contact ? [contact.latitude, contact.longitude] : [-14.235, -51.9253]; // Posição padrão (Brasil)
   const zoom = contact ? 15 : 4;
 
-  // O componente MapContainer não reage bem a mudanças de 'center'.
-  // Esta é uma forma de forçar a re-renderização quando o contato muda.
-  const mapKey = contact ? contact.id : 'default';
-
   return (
-    <MapContainer
-      key={mapKey}
-      center={position}
-      zoom={zoom}
-      scrollWheelZoom={false}
-      style={{ height: '100%', width: '100%' }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <MapContainer center={position} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+      <ChangeView center={position} zoom={zoom} />
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {contact && (
         <Marker position={position}>
           <Popup>{contact.name}</Popup>

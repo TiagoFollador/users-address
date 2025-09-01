@@ -2,13 +2,24 @@ import type { Contact } from '../lib/types';
 
 interface Props {
   contacts: Contact[];
+  isLoading?: boolean;
   selectedContactId?: number | null;
   onSelectContact: (contact: Contact) => void;
 }
 
-export function ContactList({ contacts, selectedContactId, onSelectContact }: Props) {
+export function ContactList({ contacts, isLoading = false, selectedContactId, onSelectContact }: Props) {
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold mb-4">Contatos</h2>
+        <p>Carregando...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
+      <h2 className="text-2xl font-bold mb-4">Contatos</h2>
       {contacts.map(contact => (
         <div
           key={contact.id}

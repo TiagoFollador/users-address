@@ -20,8 +20,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('contacts', ContactController::class);
     
     // Endpoint para ViaCEP
-    Route::post('/via-cep', [ContactController::class, 'viaCep']);
+    Route::post('/contacts/via-cep', [ContactController::class, 'viaCep']);
 
     // Gerenciamento de Conta
-    Route::delete('/user/delete', [AuthController::class, 'deleteAccount']);
+    Route::delete('/account', [AuthController::class, 'deleteAccount']);
 });
