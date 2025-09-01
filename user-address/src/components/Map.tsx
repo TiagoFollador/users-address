@@ -27,7 +27,13 @@ export function Map({ contact }: { contact: Contact | null }) {
   const zoom = contact ? 15 : 4;
 
   return (
-    <MapContainer center={position} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+    <MapContainer
+      center={position}
+      zoom={zoom}
+      scrollWheelZoom={true}
+      className="leaflet-map z-1"
+      style={{ height: '100%', width: '100%', position: 'relative', zIndex: 1 }}
+    >
       <ChangeView center={position} zoom={zoom} />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {contact && (

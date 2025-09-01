@@ -7,9 +7,26 @@
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  @apply bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100;
 
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
+}
+
+/* Garantir que elementos com fundo branco tenham texto escuro */
+.bg-white {
+  @apply text-gray-900;
+}
+
+/* Garantir contraste em formulários */
+input,
+textarea,
+select {
+  @apply text-gray-900;
+}
+
+/* Garantir contraste em modais/dialogs */
+[role="dialog"] {
+  @apply text-gray-900;
 }

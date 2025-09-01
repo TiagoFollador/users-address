@@ -42,7 +42,7 @@ interface ViaCepResponse {
 
 // Configuração do axios
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: 'http://localhost:3000/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -52,9 +52,11 @@ const apiClient = axios.create({
 // Interceptador de requisições para adicionar token de autenticação
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -67,7 +69,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
       // Token inválido ou expirado
       localStorage.removeItem('token');
       window.location.href = '/login';
@@ -124,21 +126,25 @@ export const contactsApi = {
 
 // Função para verificar se o usuário está autenticado
 export const isAuthenticated = (): boolean => {
+  if (typeof window === 'undefined') return false;
   return !!localStorage.getItem('token');
 };
 
 // Função para obter o token
 export const getToken = (): string | null => {
+  if (typeof window === 'undefined') return null;
   return localStorage.getItem('token');
 };
 
 // Função para definir o token
 export const setToken = (token: string): void => {
+  if (typeof window === 'undefined') return;
   localStorage.setItem('token', token);
 };
 
 // Função para remover o token
 export const removeToken = (): void => {
+  if (typeof window === 'undefined') return;
   localStorage.removeItem('token');
 };
 

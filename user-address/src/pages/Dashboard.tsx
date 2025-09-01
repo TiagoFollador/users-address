@@ -1,26 +1,46 @@
-import { useEffect, useState } from 'react';
-import { getContacts } from '../lib/api';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { contactsApi, isAuthenticated } from '../lib/api';
 import type { Contact } from '../lib/types';
 import { ContactList } from '../components/ContactList';
 import { DynamicMap } from '../components/DynamicMap';
 import { Header } from '../components/Header';
 
 export default function Dashboard() {
-  // Estado que será substituído pelo TanStack Query
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
+  // Verificar autenticação
   useEffect(() => {
-    // Simula o fetch de dados que o useQuery fará
-    setIsLoading(true);
-    getContacts().then(data => {
-      setContacts(data);
-      if (data.length > 0) {
-        setSelectedContact(data[0]); // Seleciona o primeiro por padrão
-      }
-    }).finally(() => setIsLoading(false));
+    if (!isAuthenticated()) {
+      window.location.href = '/login';
+      return;
+    }
   }, []);
+
+  // Usar TanStack Query para buscar contatos
+  const {
+    data: contactsResponse,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['contacts'],
+    queryFn: contactsApi.getAll,
+    enabled: isAuthenticated(), // Só executa se estiver autenticado
+  });
+
+  const contacts = contactsResponse?.data || [];
+
+  // Selecionar primeiro contato quando a lista carrega
+  useEffect(() => {
+    if (contacts.length > 0 && !selectedContact) {
+      setSelectedContact(contacts[0]);
+    }
+  }, [contacts, selectedContact]);
+
+  if (!isAuthenticated()) {
+    return null; // Ou um loading spinner
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -30,6 +50,8 @@ export default function Dashboard() {
           <ContactList
             contacts={contacts}
             isLoading={isLoading}
+            isError={isError}
+            error={error}
             onSelectContact={(contact) => setSelectedContact(contact)}
             selectedContactId={selectedContact?.id}
           />

@@ -8,6 +8,8 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { QueryProvider } from "../src/providers/query-provider";
+import { Toaster } from "../src/components/toaster";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -39,7 +41,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <QueryProvider>
+          {children}
+          <Toaster />
+        </QueryProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
