@@ -7,11 +7,12 @@ use App\Models\Contact;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -47,8 +48,32 @@ class User extends Authenticatable
         ];
     }
     
-        public function contacts()
-        {
+    public function contacts()
+    {
         return $this->hasMany(Contact::class);
-        }
+    }
+
+    /**
+     * Get the user's full name attribute.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Scope a query to only include users with a specific email.
+     */
+    public function scopeByEmail($query, string $email)
+    {
+        return $query->where('email', $email);
+    }
+
+    /**
+     * Check if user has any contacts.
+     */
+    public function hasContacts(): bool
+    {
+        return $this->contacts()->exists();
+    }
 }

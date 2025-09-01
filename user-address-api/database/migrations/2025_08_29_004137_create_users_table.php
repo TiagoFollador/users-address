@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        if (!Schema::hasTable('users')) {
+            Schema::create('users', function (Blueprint $table) {
             $table->id(); // Equivalente a: BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY
             $table->string('name');
             $table->string('email')->unique();
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->rememberToken(); 
             $table->timestamps(); 
         });
+        }
     }
 
     /**
