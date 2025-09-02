@@ -11,7 +11,7 @@ class ContactService
 {
     public function __construct(
         private ContactRepositoryInterface $contactRepository,
-        private GoogleMapsService $googleMapsService
+        private OpenStreetMapService $geocodingService
     ) {}
 
     public function getUserContacts(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
@@ -21,7 +21,6 @@ class ContactService
 
     public function createContact(User $user, array $data): Contact
     {
-        // Add geocoding if Google Maps is configured
         $data = $this->addCoordinates($data);
         
         return $this->contactRepository->create($user, $data);
@@ -42,7 +41,6 @@ class ContactService
     {
         $contact = $this->getContact($user, $id);
         
-        // Add geocoding if address fields changed and Google Maps is configured
         if ($this->hasAddressFields($data)) {
             $data = $this->addCoordinates($data);
         }
@@ -58,21 +56,14 @@ class ContactService
     }
 
     /**
-     * Add coordinates using Google Maps Geocoding API
+     * Add coordinates using OpenStreetMap Geocoding API
      */
     private function addCoordinates(array $data): array
     {
-        if (!$this->googleMapsService->isConfigured()) {
-            // If Google Maps is not configured, use default coordinates
-            $data['latitude'] = -23.5505; // São Paulo center
-            $data['longitude'] = -46.6333;
-            return $data;
-        }
-
         if ($this->hasAddressFields($data)) {
-            $coordinates = $this->googleMapsService->getCoordinatesFromAddress($data);
-            $data['latitude'] = $coordinates['latitude'];
-            $data['longitude'] = $coordinates['longitude'];
+            $coordinates = $this->geocodingService->getCoordinatesFromAddress($data);
+            $data['latitude'] = (string) $coordinates['latitude'];
+            $data['longitude'] = (string) $coordinates['longitude'];
         }
 
         return $data;

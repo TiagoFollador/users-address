@@ -10,20 +10,15 @@ class ViaCepService
     {
         $zipCode = preg_replace('/[^0-9]/', '', $zipCode);
 
-        // SSL handling policy:
-        // - By default, require a CA bundle at storage/cacert.pem and verify SSL.
-        // - If VIA_CEP_ALLOW_INSECURE=true in env, allow an insecure request (development only).
         $allowInsecure = filter_var(env('VIA_CEP_ALLOW_INSECURE', false), FILTER_VALIDATE_BOOLEAN);
         $cacert = storage_path('cacert.pem');
 
         if ($allowInsecure) {
-            logger()->warning('ViaCepService: VIA_CEP_ALLOW_INSECURE=true, performing unverified request to ViaCEP.');
             $response = Http::withOptions(['verify' => false])->get("https://viacep.com.br/ws/{$zipCode}/json/");
         } else {
             if (!file_exists($cacert)) {
                 throw new \RuntimeException('CA bundle not found: place a valid cacert.pem at storage/cacert.pem or set VIA_CEP_ALLOW_INSECURE=true for development.');
             }
-
             $response = Http::withOptions(['verify' => $cacert])->get("https://viacep.com.br/ws/{$zipCode}/json/");
         }
 

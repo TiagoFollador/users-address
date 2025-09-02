@@ -28,8 +28,8 @@ return new class extends Migration
             $table->string('neighborhood');
             $table->string('city');
             $table->string('state', 2);
-            $table->decimal('latitude', 10, 8);
-            $table->decimal('longitude', 11, 8);
+            $table->string('latitude', 20);
+            $table->string('longitude', 20);
             $table->timestamps();
         });
     }

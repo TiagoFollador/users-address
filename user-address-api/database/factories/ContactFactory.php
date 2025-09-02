@@ -30,10 +30,11 @@ class ContactFactory extends Factory
             'neighborhood' => fake()->citySuffix(),
             'city' => fake()->city(),
             'state' => strtoupper(fake()->stateAbbr()),
-            // Do not generate random coordinates here; geocoding should be performed
-            // when creating contacts via the application or by a dedicated backfill.
-            'latitude' => null,
-            'longitude' => null,
+            // Generate plausible random coordinates as strings so DB non-null
+            // constraints are satisfied during seeding. Real geocoding can be
+            // performed by the app when creating contacts or by a backfill job.
+            'latitude' => (string) number_format(fake()->randomFloat(6, -90, 90), 6, '.', ''),
+            'longitude' => (string) number_format(fake()->randomFloat(6, -180, 180), 6, '.', ''),
         ];
     }
 }
