@@ -92,7 +92,7 @@ interface ContactUpdateData extends Partial<ContactCreateData> {}
 
 // Configuração do axios
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000/api', // Corrigido para usar a URL correta
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
